@@ -43,7 +43,7 @@ canvas#anim{display:block;width:100%;border-radius:.8rem;background:#03030a;bord
 .btn-reset{background:transparent;color:var(--text);border:1px solid var(--border)}
 .btn-reset:hover{border-color:var(--text);background:rgba(255,255,255,.05)}
 
-/* Era Switcher (Spesial untuk Tab 5) */
+/* Era Switcher */
 .era-wrap{display:none;align-items:center;gap:.5rem;background:#03030a;border:1px solid var(--purple);padding:.25rem;border-radius:.6rem;margin-left:auto}
 @media(max-width:650px){.era-wrap{margin-left:0;width:100%;justify-content:center}}
 .era-btn{padding:.4rem .8rem;border-radius:.4rem;border:none;background:transparent;color:var(--muted);font-family:var(--fm);font-size:.75rem;font-weight:700;cursor:pointer;transition:.2s}
@@ -53,7 +53,7 @@ canvas#anim{display:block;width:100%;border-radius:.8rem;background:#03030a;bord
 .mode-btn{padding:.4rem .8rem;border-radius:.4rem;border:none;background:transparent;color:var(--muted);font-family:var(--fm);font-size:.72rem;cursor:pointer;font-weight:700}
 .mode-btn.active{background:var(--border);color:var(--gold)}
 
-/* Structured Cards Box below Canvas */
+/* Structured Cards Box */
 .grid-cards{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
 @media(max-width:700px){.grid-cards{grid-template-columns:1fr}}
 .card{background:var(--panel);border:1px solid var(--border);border-radius:1rem;padding:1.4rem;line-height:1.6}
@@ -88,8 +88,8 @@ canvas#anim{display:block;width:100%;border-radius:.8rem;background:#03030a;bord
     
     <div class="era-wrap" id="eraWrap" style="display:flex">
       <span style="font-size:.75rem;color:var(--muted);font-weight:700;padding-left:.5rem">WAKTU:</span>
-      <button class="era-btn active" data-era="now">Sekarang (2026 M)</button>
-      <button class="era-btn" data-era="ancient">Zaman Kuno (0 M)</button>
+      <button class="era-btn" data-era="now">Sekarang (2026 M)</button>
+      <button class="era-btn active" data-era="ancient">Zaman Kuno (0 M)</button>
     </div>
 
     <div class="mode-toggle" id="modeWrap" style="display:none">
@@ -99,9 +99,7 @@ canvas#anim{display:block;width:100%;border-radius:.8rem;background:#03030a;bord
   </div>
 </div>
 
-<div id="infoGrid" class="grid-cards">
-  <!-- Dynamic cards inserted via JS -->
-</div>
+<div id="infoGrid" class="grid-cards"></div>
 
 </div>
 
@@ -109,13 +107,13 @@ canvas#anim{display:block;width:100%;border-radius:.8rem;background:#03030a;bord
 const canvas = document.getElementById('anim');
 const ctx = canvas.getContext('2d');
 
-let step = 4; // Default langsung buka Tab 5 (Presesi)
+let step = 4; // Default ke Tab 5
 let playing = false;
 let progress = 0; 
 let raf;
 let lastTs = null;
 let EXTRA_DEG = 45;
-let currentEra = "now"; // "now" or "ancient"
+let currentEra = "ancient"; // Mulai dari zaman kuno agar sesuai dengan klik Play pertama kali
 
 const SID_DAY_SEC = 86164.1;
 const SOL_DAY_SEC = 86400;
@@ -210,65 +208,91 @@ function drawStep4(p){
   const w = W(), h = H();
   const sunX = w * 0.45, sunY = h * 0.52;
   const earthR = Math.min(w, h) * 0.075;
-  const earthX = w * 0.16, earthY = sunY; // Bumi di kiri Matahari
+  const earthX = w * 0.16, earthY = sunY;
 
   ctx.clearRect(0, 0, w, h);
   drawStarBg();
 
-  // 1. Gambar Sabuk Rasi Bintang Zodiak di latar belakang kanan
   const zodiacX = w * 0.82;
   const ariesY = h * 0.25;
   const piscesY = h * 0.52;
   const aquaY = h * 0.79;
 
-  // Garis lengkung sabuk zodiak
   ctx.save();
   ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.lineWidth = 40; ctx.lineCap = 'round';
   ctx.beginPath(); ctx.moveTo(zodiacX, ariesY - 20); ctx.lineTo(zodiacX, aquaY + 20); ctx.stroke();
   ctx.restore();
 
-  // Box Rasi Aries
-  drawZodiacBox(zodiacX, ariesY, "♈ RASI ARIES", "Awal Musim Semi Kuno (~0 M)", currentEra === "ancient" ? "#a55eea" : "rgba(255,255,255,.3)");
-  // Box Rasi Pisces
-  drawZodiacBox(zodiacX, piscesY, "♓ RASI PISCES", "Posisi Nyata Sekarang (2026 M)", currentEra === "now" ? "#00d2d3" : "rgba(255,255,255,.3)");
-  // Box Rasi Aquarius
-  drawZodiacBox(zodiacX, aquaY, "♒ RASI AQUARIUS", "Masa Depan (~2600 M)", "rgba(255,255,255,.2)");
+  // Animasi progress p (0 sampai 1) bergerak dari Aries (Kuno) ke Pisces (Sekarang) dan terus ke Aquarius (Masa Depan)
+  // Jika tidak sedang dimainkan (playing=false), ikuti posisi dari tombol yang diklik
+  let currentTargetY = ariesY;
+  let targetColor = "#a55eea";
+  let labelText = "Garis Pandang 0 Masehi: 21 Maret Tepat Menunjuk Aries!";
 
-  // 2. Garis Pandang dari Bumi melewati Matahari ke Zodiak
-  const targetY = currentEra === "ancient" ? ariesY : piscesY;
-  const targetColor = currentEra === "ancient" ? "#a55eea" : "#00d2d3";
+  if(playing || p > 0){
+    // Animasi bergerak mulus turun melewati rasi-rasi
+    currentTargetY = ariesY + (p * (aquaY - ariesY));
+    if(currentTargetY < piscesY - 30){
+      targetColor = "#a55eea";
+      labelText = "Zaman Kuno (~0 M): 21 Maret Menunjuk ARIES";
+      updateEraButtons("ancient");
+    } else if(currentTargetY < aquaY - 30){
+      targetColor = "#00d2d3";
+      labelText = "Zaman Sekarang (~2026 M): 21 Maret Menunjuk PISCES (Geser 1 Bulan!)";
+      updateEraButtons("now");
+    } else {
+      targetColor = "#ffd32a";
+      labelText = "Masa Depan (~2600 M): 21 Maret Akan Menunjuk AQUARIUS";
+      updateEraButtons("none");
+    }
+  } else {
+    // Mode statis mengikuti tombol era
+    if(currentEra === "now"){
+      currentTargetY = piscesY;
+      targetColor = "#00d2d3";
+      labelText = "Zaman Sekarang (2026 M): 21 Maret Menunjuk PISCES (Geser 1 Bulan!)";
+    } else {
+      currentTargetY = ariesY;
+      targetColor = "#a55eea";
+      labelText = "Zaman Kuno (0 Masehi): 21 Maret Tepat Menunjuk Aries!";
+    }
+  }
+
+  drawZodiacBox(zodiacX, ariesY, "♈ RASI ARIES", "Awal Musim Semi Kuno (~0 M)", Math.abs(currentTargetY - ariesY) < 40 ? "#a55eea" : "rgba(255,255,255,.3)");
+  drawZodiacBox(zodiacX, piscesY, "♓ RASI PISCES", "Posisi Nyata Sekarang (2026 M)", Math.abs(currentTargetY - piscesY) < 40 ? "#00d2d3" : "rgba(255,255,255,.3)");
+  drawZodiacBox(zodiacX, aquaY, "♒ RASI AQUARIUS", "Masa Depan (~2600 M)", Math.abs(currentTargetY - aquaY) < 40 ? "#ffd32a" : "rgba(255,255,255,.2)");
 
   ctx.save();
   ctx.strokeStyle = targetColor; ctx.lineWidth = 3; ctx.setLineDash([8,6]);
-  ctx.beginPath(); ctx.moveTo(earthX, earthY); ctx.lineTo(zodiacX - 70, targetY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(earthX, earthY); ctx.lineTo(zodiacX - 70, currentTargetY); ctx.stroke();
   ctx.restore();
 
-  // Arrowhead pada garis pandang
   ctx.save();
   ctx.fillStyle = targetColor;
-  ctx.beginPath(); ctx.arc(zodiacX - 70, targetY, 6, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(zodiacX - 70, currentTargetY, 6, 0, Math.PI*2); ctx.fill();
   ctx.restore();
 
-  // 3. Gambar Matahari & Bumi
   drawSun(sunX, sunY, Math.min(w, h) * 0.08);
   
-  // Goyangan sumbu Bumi visualisasi
-  const tilt = currentEra === "ancient" ? -0.3 : 0.3;
-  drawEarth(earthX, earthY, earthR, tilt, "solid");
+  const tilt = -(p * 0.8) + 0.3; // Kemiringan berubah saat sumbu bergoyang
+  drawEarth(earthX, earthY, earthR, playing ? tilt : (currentEra === "ancient" ? -0.3 : 0.3), "solid");
   
   ctx.save();
   ctx.font = '700 11px Space Grotesk'; ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
   ctx.fillText('BUMI (21 Maret / Ekuinoks)', earthX, earthY + earthR + 20);
   ctx.restore();
 
-  // 4. Label Penjelasan Live di atas Garis Pandang
   ctx.save();
   ctx.font = '700 12px Space Grotesk'; ctx.fillStyle = targetColor; ctx.textAlign = 'center';
-  const labelText = currentEra === "ancient" 
-    ? "Garis Pandang 0 Masehi: 21 Maret Tepat Menunjuk Aries!" 
-    : "Garis Pandang Sekarang: 21 Maret Menunjuk PISCES (Geser 1 Bulan!)";
-  ctx.fillText(labelText, (earthX + zodiacX)/2 - 30, Math.min(earthY, targetY) - 15);
+  ctx.fillText(labelText, (earthX + zodiacX)/2 - 30, Math.min(earthY, currentTargetY) - 15);
   ctx.restore();
+}
+
+function updateEraButtons(activeEra){
+  document.querySelectorAll('.era-btn').forEach(b => {
+    b.classList.remove('active');
+    if(b.dataset.era === activeEra) b.classList.add('active');
+  });
 }
 
 function drawZodiacBox(x, y, title, sub, color){
@@ -501,6 +525,10 @@ document.querySelectorAll('.era-btn').forEach(b => {
     document.querySelectorAll('.era-btn').forEach(x => x.classList.remove('active'));
     b.classList.add('active');
     currentEra = b.dataset.era;
+    // Hentikan play otomatis jika pengguna mengklik manual tombol era agar tidak bertabrakan
+    playing = false;
+    progress = 0;
+    document.getElementById('btnPlay').innerHTML = '▶ Play Animasi';
     draw();
   });
 });
