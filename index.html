@@ -68,16 +68,16 @@ canvas#anim{display:block;width:100%;border-radius:.8rem;background:#03030a;bord
 <body>
 <div class="page">
 
-<div class="eyebrow">Pencerahan Astronomi & Zodiak</div>
+<div class="eyebrow">Astronomi & Astrologi</div>
 <h1>Misteri <em>"Titik Aries"</em> yang Kini Ada di Pisces</h1>
-<p class="sub">Mengapa ramalan zodiak Barat tidak lagi presisi dengan posisi rasi bintang asli di langit malam? Semua karena goyangan sumbu Bumi!</p>
+<p class="sub">Mengapa ramalan zodiak Barat tidak lagi presisi dengan posisi rasi bintang asli di langit malam?</p>
 
 <div class="tabs">
-  <button class="tab" data-step="1">① Pembuktian Harian (~4 Menit)</button>
+  <button class="tab" data-step="1">① Pembuktian Selisih Per Harinya</button>
   <button class="tab" data-step="0">② Rotasi Murni 360°</button>
-  <button class="tab" data-step="2">③ Balapan Jam Real-Time</button>
+  <button class="tab" data-step="2">③ Jam Real-Time</button>
   <button class="tab" data-step="3">④ Akumulasi 1 Tahun (365 vs 366)</button>
-  <button class="tab tab-precession active" data-step="4">⑤ Kenapa Zodiak Geser? (Presesi) 🌌</button>
+  <button class="tab tab-precession active" data-step="4">⑤ Kenapa Zodiak Geser? 🌌</button>
 </div>
 
 <div class="canvas-card">
@@ -94,7 +94,7 @@ canvas#anim{display:block;width:100%;border-radius:.8rem;background:#03030a;bord
 
     <div class="mode-toggle" id="modeWrap" style="display:none">
       <button class="mode-btn active" data-deg="45">Mode 45° (Eksagerasi Jelas)</button>
-      <button class="mode-btn" data-deg="1">Mode 1° (Skala Nyata)</button>
+      <button class="mode-btn" data-deg="1">Mode 0,9856° (Skala Nyata)</button>
     </div>
   </div>
 </div>
@@ -429,8 +429,8 @@ function updateUI(){
     modeWrap.style.display = 'none';
     grid.innerHTML = `
       <div class="card full">
-        <h3>💡 Jawaban Kritis: Kenapa Namanya Tetap "Titik Aries"?</h3>
-        <p>Kamu 100% benar! Secara realita astronomi modern, ketika hari Ekuinoks Musim Semi (21 Maret) tiba, Matahari berada di depan rasi <strong>Pisces</strong>, bukan Aries lagi! Namun nama <strong>"First Point of Aries" (Titik Aries / $\gamma$)</strong> dipertahankan oleh para astronom dan navigator laut sebagai <em>nama koordinat tetap (tradisi)</em> agar seluruh rumus hukum langit abad lampau tidak perlu diubah. Analogi mudahnya: kita masih menyebut "Tombol Save" dengan ikon Disket padahal kita sudah tidak pakai Floppy Disk lagi!</p>
+        <h3>💡 Kenapa Namanya Tetap "Titik Aries" untuk patokan musim semi?</h3>
+        <p>Secara realita astronomi modern, ketika hari Ekuinoks Musim Semi (21 Maret) tiba, Matahari berada di depan rasi <strong>Pisces</strong>, bukan Aries lagi! Namun nama <strong>"First Point of Aries" (Titik Aries) dipertahankan oleh para astronom dan navigator laut sebagai <em>nama koordinat tetap (tradisi)</em> agar seluruh rumus hukum langit abad lampau tidak perlu diubah.</p>
       </div>
       <div class="card">
         <h3>♈ Astrologi Barat (Tropis)</h3>
@@ -451,7 +451,7 @@ function updateUI(){
       </div>
       <div class="card">
         <h3 style="color:var(--tropic)"> Hari Surya / Tropis <span class="badge" style="background:var(--tropic)">24j 00m 00s</span></h3>
-        <p>Bumi harus berputar tambahan ($\Delta \theta$) agar jarum kembali menghadap tepat ke pusat Matahari (siang hari). Butuh waktu ekstra <strong>~3 menit 56 detik</strong> inilah yang kita genapkan jadi 24 jam!</p>
+        <p>Bumi harus berputar tambahan agar jarum kembali menghadap tepat ke pusat Matahari (siang hari). Butuh waktu ekstra <strong>~3 menit 56 detik</strong> inilah yang kita genapkan jadi 24 jam!</p>
       </div>
     `;
   } else if(step === 3){
